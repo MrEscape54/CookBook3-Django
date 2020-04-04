@@ -1,6 +1,8 @@
 import os
+import sys
 import json
 from django.core.exceptions import ImproperlyConfigured
+from cookbook.apps.core.versioning import get_git_changeset_timestamp
 
 with open(os.path.join(os.path.dirname(__file__), 'secrets.json'), 'r') as f:
     secrets = json.loads(f.read())
@@ -15,6 +17,11 @@ def get_secret(setting):
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXTERNAL_BASE = os.path.join(BASE_DIR, 'externals')
+EXTERNAL_LIBS_PATH = os.path.join(EXTERNAL_BASE, 'libs')
+EXTERNAL_APPS_PATH = os.path.join(EXTERNAL_BASE, 'apps')
+
+sys.path = ['', EXTERNAL_LIBS_PATH, EXTERNAL_APPS_PATH] + sys.path
 
 
 # Quick-start development settings - unsuitable for production
@@ -119,7 +126,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+timestamp = get_git_changeset_timestamp(BASE_DIR)
+STATIC_URL = f'/static/{timestamp}/'
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'cookbook', 'site_static'),]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
